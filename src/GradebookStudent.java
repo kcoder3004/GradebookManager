@@ -33,7 +33,7 @@ public class GradebookStudent {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty.");
         }
-        this.name = name; // Fixed reverse assignment
+        this.name = name; 
     }
 
     public void addGrade(GradeItem grade) {
@@ -61,19 +61,20 @@ public class GradebookStudent {
     }
 
     public void displayDetails() {
-    System.out.println("ID: " + id);
-    System.out.println("Name: " + name);
+        
+        System.out.println("ID: " + id);
+        System.out.println("Name: " + name);
 
-    System.out.println("Grades:");
+        System.out.println("Grades:");
 
-    if (grades.size() == 0) {
+        if (grades.size() == 0) {
         System.out.println("No grades yet");
-    } else {
+        } else {
         for (int i = 0; i < grades.size(); i++) {
             System.out.println(grades.get(i));
         }
-    }
+        }
 
-    System.out.println("Average: " + averageGrade());
+        System.out.println("Average: " + getAverageScore());
 }
 }

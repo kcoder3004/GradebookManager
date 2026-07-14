@@ -1,5 +1,6 @@
 package src;
 public class GradeItem {
+    
     private String title;
     private double score;
     public GradeItem(String title, double score){
@@ -12,6 +13,7 @@ public class GradeItem {
             throw new IllegalArgumentException("Score is out of bounds");
         }
     }
+
     public String getTitle(){
         return title;
     }
