@@ -7,6 +7,10 @@ public class GradebookManager {
         this.students = students;
     }
 
+    public GradebookManager(){
+        
+    }
+
     public boolean addStudent(GradebookStudent student) {
 
     for (int i = 0; i < students.size(); i++) {
