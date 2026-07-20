@@ -19,66 +19,73 @@ public class GradebookManager {
     }
 
     public boolean addStudent(GradebookStudent student) {
-
         for (int i = 0; i < students.size(); i++) {
-
             if (students.get(i).getId() == student.getId()) {
                 return false;
             }
         }
-
         students.add(student);
         return true;
     }
 
     public GradebookStudent findById(int id) {
-
         for (int i = 0; i < students.size(); i++) {
-
             GradebookStudent student = students.get(i);
-
             if (student.getId() == id) {
                 return student;
             }
         }
-
         return null;
     }
 
     public void viewAllStudents() {
-
         if (students.size() == 0) {
             System.out.println("No students in gradebook.");
             return;
         }
-
         for (int i = 0; i < students.size(); i++) {
             System.out.println(students.get(i));
         }
     }
 
     public void viewStudentDetails(int id) {
-
         GradebookStudent student = findById(id);
-
         if (student == null) {
             System.out.println("Student not found.");
             return;
         }
-
         student.displayDetails();
     }
 
-    public void loadFromFile(String filename) {
+    public boolean loadFromFile(String filename) {
+        File file = new File(filename);
 
+        // Smart Path Fallback: If "data/filename" isn't found, try looking directly in root
+        if (!file.exists() && filename.contains("/")) {
+            String fallbackName = filename.substring(filename.lastIndexOf("/") + 1);
+            File fallbackFile = new File(fallbackName);
+            if (fallbackFile.exists()) {
+                file = fallbackFile;
+            }
+        }
+
+        // Fixed: Verify the file exists BEFORE clearing out memory data
+        if (!file.exists()) {
+            System.out.println("Error: File not found. Please ensure your data file exists at either:");
+            System.out.println("  -> " + filename);
+            if (filename.contains("/")) {
+                System.out.println("  -> " + filename.substring(filename.lastIndexOf("/") + 1));
+            }
+            return false;
+        }
+
+        // Safe to clear now that we verified the file can be reached
         students.clear();
 
         try {
-
-            Scanner fileScanner = new Scanner(new File(filename));
+            Scanner fileScanner = new Scanner(file);
 
             while (fileScanner.hasNextLine()) {
-
                 String line = fileScanner.nextLine();
 
                 if (line.trim().isEmpty()) {
@@ -86,82 +93,57 @@ public class GradebookManager {
                 }
 
                 String[] parts = line.split(",");
+                
+                try {
+                    if (parts[0].equals("STUDENT") && parts.length >= 3) {
+                        int id = Integer.parseInt(parts[1].trim());
+                        String name = parts[2].trim();
 
-                if (parts[0].equals("STUDENT")) {
+                        GradebookStudent student = new GradebookStudent(id, name);
+                        addStudent(student);
+                        
+                    } else if (parts[0].equals("GRADE") && parts.length >= 4) {
+                        int studentId = Integer.parseInt(parts[1].trim());
+                        String title = parts[2].trim();
+                        double score = Double.parseDouble(parts[3].trim());
 
-                    int id = Integer.parseInt(parts[1]);
-                    String name = parts[2];
-
-                    GradebookStudent student =
-                            new GradebookStudent(id, name);
-
-                    addStudent(student);
-                }
-
-                else if (parts[0].equals("GRADE")) {
-
-                    int studentId = Integer.parseInt(parts[1]);
-                    String title = parts[2];
-                    double score = Double.parseDouble(parts[3]);
-
-                    GradebookStudent student = findById(studentId);
-
-                    if (student != null) {
-
-                        GradeItem grade =
-                                new GradeItem(title, score);
-
-                        student.addGrade(grade);
+                        GradebookStudent student = findById(studentId);
+                        if (student != null) {
+                            GradeItem grade = new GradeItem(title, score);
+                            student.addGrade(grade);
+                        }
                     }
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Skipping malformed data line: " + line);
                 }
             }
-
             fileScanner.close();
+            return true;
 
         } catch (FileNotFoundException e) {
-
-            System.out.println("File not found.");
+            System.out.println("Could not open file: " + file.getPath());
+            return false;
         }
     }
 
     public void saveToFile(String filename) {
-
         try {
-
             PrintWriter writer = new PrintWriter(filename);
 
             for (int i = 0; i < students.size(); i++) {
-
                 GradebookStudent student = students.get(i);
 
-                writer.println(
-                        "STUDENT,"
-                        + student.getId()
-                        + ","
-                        + student.getName()
-                );
-
+                writer.println("STUDENT," + student.getId() + "," + student.getName());
                 ArrayList<GradeItem> grades = student.getGrades();
 
                 for (int j = 0; j < grades.size(); j++) {
-
                     GradeItem grade = grades.get(j);
-
-                    writer.println(
-                            "GRADE,"
-                            + student.getId()
-                            + ","
-                            + grade.getTitle()
-                            + ","
-                            + grade.getScore()
-                    );
+                    writer.println("GRADE," + student.getId() + "," + grade.getTitle() + "," + grade.getScore());
                 }
             }
-
             writer.close();
 
         } catch (FileNotFoundException e) {
-
             System.out.println("Could not save file.");
         }
     }
