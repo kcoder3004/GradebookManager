@@ -8,8 +8,10 @@ public class GradebookStudent {
     private String name;
     private ArrayList<GradeItem> grades;
 
+    // Initialize student record
     public GradebookStudent(int id, String name) {
 
+        // Quick checks so we don't end up with bad data
         if (id <= 0) {
             throw new IllegalArgumentException("ID must be greater than 0.");
         }
@@ -20,9 +22,10 @@ public class GradebookStudent {
 
         this.id = id;
         this.name = name;
-        grades = new ArrayList<>();
+        this.grades = new ArrayList<>(); // start with empty grades list
     }
 
+    // Basic getters
     public int getId() {
         return id;
     }
@@ -40,6 +43,7 @@ public class GradebookStudent {
         this.name = name;
     }
 
+    // Add a new assignment grade (ignore nulls just in case)
     public void addGrade(GradeItem grade) {
 
         if (grade != null) {
@@ -48,14 +52,17 @@ public class GradebookStudent {
 
     }
 
+    // Return a copy of the list so external code can't mess with internal list directly
     public ArrayList<GradeItem> getGrades() {
 
         return new ArrayList<>(grades);
 
     }
 
+    // Calculate total average across all added grades
     public double averageGrade() {
 
+        // Avoid divide-by-zero if no grades added yet
         if (grades.size() == 0) {
             return 0.0;
         }
@@ -72,6 +79,7 @@ public class GradebookStudent {
 
     }
 
+    // Print out full student breakdown
     public void displayDetails() {
 
         System.out.println("ID: " + id);
@@ -95,7 +103,7 @@ public class GradebookStudent {
 
     }
 
-
+    // One-line summary format for lists/search results
     @Override
     public String toString() {
 

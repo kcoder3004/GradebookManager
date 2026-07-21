@@ -10,6 +10,7 @@ public class GradebookManager {
 
     private ArrayList<GradebookStudent> students;
 
+    // Constructors
     public GradebookManager() {
         students = new ArrayList<>();
     }
@@ -18,16 +19,18 @@ public class GradebookManager {
         this.students = students;
     }
 
+    // Add student, but reject duplicates with the same ID
     public boolean addStudent(GradebookStudent student) {
         for (int i = 0; i < students.size(); i++) {
             if (students.get(i).getId() == student.getId()) {
-                return false;
+                return false; // ID already exists
             }
         }
         students.add(student);
         return true;
     }
 
+    // Helper to search list by student ID
     public GradebookStudent findById(int id) {
         for (int i = 0; i < students.size(); i++) {
             GradebookStudent student = students.get(i);
@@ -35,9 +38,10 @@ public class GradebookManager {
                 return student;
             }
         }
-        return null;
+        return null; // Not found
     }
 
+    // Print all students on high level
     public void viewAllStudents() {
         if (students.size() == 0) {
             System.out.println("No students in gradebook.");
@@ -48,6 +52,7 @@ public class GradebookManager {
         }
     }
 
+    // Print specific student and all their grades
     public void viewStudentDetails(int id) {
         GradebookStudent student = findById(id);
         if (student == null) {
@@ -57,10 +62,11 @@ public class GradebookManager {
         student.displayDetails();
     }
 
+    // Load data file into memory
     public boolean loadFromFile(String filename) {
         File file = new File(filename);
 
-        // Smart Path Fallback: If "data/filename" isn't found, try looking directly in root
+        // Path fallback: if nested folder fails, try checking project root directly
         if (!file.exists() && filename.contains("/")) {
             String fallbackName = filename.substring(filename.lastIndexOf("/") + 1);
             File fallbackFile = new File(fallbackName);
@@ -69,7 +75,7 @@ public class GradebookManager {
             }
         }
 
-        // Fixed: Verify the file exists BEFORE clearing out memory data
+        // Verify file exists first so we don't accidentally wipe existing list on bad path
         if (!file.exists()) {
             System.out.println("Error: File not found. Please ensure your data file exists at either:");
             System.out.println("  -> " + filename);
@@ -79,7 +85,7 @@ public class GradebookManager {
             return false;
         }
 
-        // Safe to clear now that we verified the file can be reached
+        // Wipe current data so we load fresh from file
         students.clear();
 
         try {
@@ -88,6 +94,7 @@ public class GradebookManager {
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine();
 
+                // Skip blank lines
                 if (line.trim().isEmpty()) {
                     continue;
                 }
@@ -95,6 +102,7 @@ public class GradebookManager {
                 String[] parts = line.split(",");
                 
                 try {
+                    // Parse student record lines: STUDENT, id, name
                     if (parts[0].equals("STUDENT") && parts.length >= 3) {
                         int id = Integer.parseInt(parts[1].trim());
                         String name = parts[2].trim();
@@ -102,6 +110,7 @@ public class GradebookManager {
                         GradebookStudent student = new GradebookStudent(id, name);
                         addStudent(student);
                         
+                    // Parse grade entry lines: GRADE, studentId, title, score
                     } else if (parts[0].equals("GRADE") && parts.length >= 4) {
                         int studentId = Integer.parseInt(parts[1].trim());
                         String title = parts[2].trim();
@@ -114,6 +123,7 @@ public class GradebookManager {
                         }
                     }
                 } catch (IllegalArgumentException e) {
+                    // Skip bad rows without crashing whole import
                     System.out.println("Skipping malformed data line: " + line);
                 }
             }
@@ -126,6 +136,7 @@ public class GradebookManager {
         }
     }
 
+    // Save all current memory records out to CSV text file
     public void saveToFile(String filename) {
         try {
             PrintWriter writer = new PrintWriter(filename);
@@ -133,9 +144,11 @@ public class GradebookManager {
             for (int i = 0; i < students.size(); i++) {
                 GradebookStudent student = students.get(i);
 
+                // Output student row
                 writer.println("STUDENT," + student.getId() + "," + student.getName());
                 ArrayList<GradeItem> grades = student.getGrades();
 
+                // Output associated grade rows right under
                 for (int j = 0; j < grades.size(); j++) {
                     GradeItem grade = grades.get(j);
                     writer.println("GRADE," + student.getId() + "," + grade.getTitle() + "," + grade.getScore());
