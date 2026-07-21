@@ -22,7 +22,6 @@ public class GradeItem {
     public String getTitle() {
         return title;
     }
-
     public double getScore() {
         return score;
     }
