@@ -41,7 +41,7 @@ public class GradebookManager {
         return null; // Not found
     }
 
-    // Print all students on high level
+    // Print all students
     public void viewAllStudents() {
         if (students.size() == 0) {
             System.out.println("No students in gradebook.");
@@ -66,7 +66,7 @@ public class GradebookManager {
     public boolean loadFromFile(String filename) {
         File file = new File(filename);
 
-        // Path fallback: if nested folder fails, try checking project root directly
+        // Path issue, if nested folder fails, try checking project root directly
         if (!file.exists() && filename.contains("/")) {
             String fallbackName = filename.substring(filename.lastIndexOf("/") + 1);
             File fallbackFile = new File(fallbackName);
